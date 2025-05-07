@@ -159,7 +159,7 @@ Congratulations, we just set up Elasticsearch and can confirm that a cluster is 
 
 If you ever want to edit the `elasticsearch.yml` configuration on your own time, <strong>you will need to run `sudo systemctl restart elasticsearch.service` so that the updated configuarion is read by Elasticsearch.</strong>
 
-<h2 align="center">Configuring Kibana</h2>
+## Configuring Kibana
 Configuring Kibana starts with installing it; run `sudo apt install kibana -y`.
 
 Next we will update the YML configuration of Kibana just like we did with Elasticsearch. In my case of running Vim as my editor, run `sudo vim /etc/kibana/kibana.yml`.
@@ -344,18 +344,21 @@ Save and exit as usual, and we are ready to load our new configurations to offic
 2. `sudo systemctl restart kibana`
 
 We don't need `filebeat` running for this next step. Our last check to ensure everything is in order is to `curl` the HTTPS host for Elasticsearch, which in my case is: `curl --get https://10.0.2.15:9200`. Replace your IP as needed, 
-![Erm... What?](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/curl-fail.png)
+
+![Fail](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/curl-fail.png)
 
 
-<strong>Noooooooooooo!</strong> Firstly, don't quit easy like that. Secondly, the reason why `curl` failed like this is because our browser does not trust the certificate just yet, or rather, the CA. We can bypass this temporarily and just add the `--insecure` parameter to end of our `curl` command and pipe the output to `jq` to make it nice and pretty as JSON format: `curl --get https://10.0.2.15:9200 --insecure | jq`.
-![Yippee!](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/curl-success.png)
+The reason why `curl` failed like this is because our browser does not trust the certificate just yet, or rather, the CA. We can bypass this temporarily and just add the `--insecure` parameter to end of our `curl` command and pipe the output to `jq` to make it nice and pretty as JSON format: `curl --get https://10.0.2.15:9200 --insecure | jq`.
 
-Nice, we at least got something! To summarize this output, we require credential to log into Elasticsearch, which we will generate in the next step of our guide. But for now, go ahead and pat yourself on the back; we've got SSL running and security enabled! One step closer to a real homelab setup. We can stop our services by running `sudo systemctl stop kibana` then `sudo systemctl stop elasticsearch`. 
+![Success!!!](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/curl-success.png)
 
-<h2 align="center">Generating Authentication Credentials For Elasticsearch</h2>
-To generate credentials, we will use the [elasticsearch-setup-passwords](https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-passwords.html) utility to do so. Documentation is hyperlinked as always for your reading. Simply put, the utility will generate passwords for a cluster and connect via HTTPS using our previously defined `xpack.security.http.ssl` in our `elasticsearch.yml` file. 
+To summarize this output, we require credential to log into Elasticsearch, which we will generate in the next step of our guide. But for now we've got SSL running and security enabled! One step closer to a real homelab setup. 
 
-Run `sudo /usr/share/elasticsearch/bin/elasticsearch-setup-passwords auto` to randomly generate passwords, set the passwords of select users, and output them to the console. Make sure Elasticsearch is running before you do this or else you will get an error. You will see many passwords and names associated with them. For example, `apm_system` is the [APM or Application Performance Montioring System](https://www.elastic.co/guide/en/observability/current/apm.html), which, per its name, collects performance metrics for services and applications running in real-time, and is built on the Elastic Stack. More information about these users can be collected here by [Elastic's official documentation.](https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-users.html)
+## Generating Authentication Credentials For Elasticsearch
+
+To generate credentials, we will use the Elasticsearch Password Setup utility to do so. Simply put, the utility will generate passwords for a cluster and connect via HTTPS using our previously defined `xpack.security.http.ssl` in our `elasticsearch.yml` file. 
+
+Run `sudo /usr/share/elasticsearch/bin/elasticsearch-setup-passwords auto` to randomly generate passwords, set the passwords of select users, and output them to the console. Make sure Elasticsearch is running before you do this or else you will get an error. You will see many passwords and names associated with them. For example, `apm_system` is the APM (Application Performance Montioring System), which, per its name, collects performance metrics for services and applications running in real-time, and is built on the Elastic Stack.
 
 We only need the `kibana_system` password as Kibana authenticates through Elasticsearch and thus grants access to the frontend UI. <strong>However,</strong> we will need to create our own user with prvilieges to login to the SIEM frontend after we initially login using the <strong>`elastic` superuser</strong>. It's credentials will be `elastic` as its username and `<generated_password>` from the previous step when we generated new passwords.
 
@@ -365,10 +368,11 @@ Save and exit our YML config file and restart Kibana so that our new configurati
 
 And with that, we are ready to log into our SIEM frontend for the first time!
 
-<h2 align="center">Logging into Elastic</h2>
+## Logging into Elastic
+
 Firstly, start up Elasticsearch and Kibana if you haven't already with `sudo systemctl start elasticsearch`, `sudo systemctl start kibana` and `sudo systemctl start filebeat`. The fun part starts now.
 
-Secondly, we can't actually access our frontend just yet. We actually need to create a port forwarding rule, Fun fact, `10.0.2.15:5601` is hosted on the SERVER, but not publicly accessible to US. We need to redirect, or otherwise, <strong>forward</strong>, the traffic to us so we can recieve it.
+Secondly, we can't actually access our frontend just yet. We actually need to create a port forwarding rule, `10.0.2.15:5601` is hosted on the SERVER, but not publicly accessible to us. We need to redirect, or otherwise, <strong>forward</strong>, the traffic to us so we can recieve it.
 
 Open your Network settings as we did long ago to configure SSH's port forwaring. Create a new rule with the little 'Plus' icon on the right with the following specifications:
 - Protocol: TCP
@@ -378,23 +382,24 @@ Open your Network settings as we did long ago to configure SSH's port forwaring.
 - Gust Port: 5601
 
 `YOUR_KIBANA_IP` is the IP you are hosting the Kibana server on, which is shown in both Kibana's log files and the `kibana.yml` configuration. Once you've created the rule, you can attempt to head to your frontend in your web browser at `https://127.0.0.1:5601` if your VM is powered on and your services are running.
-![Waiting....](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/frontend-loading.png)
+
 
 The loading may take a while; just be patient...
-![A FRONTEND????????????](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/frontend-loaded.png)
+![A FRONTEND????????????](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/frontend-loaded.png)
 
 Now we login using our <strong>`elastic` superuser credentials</strong> and NOT the `kibana_system` user.
-![IT WORKED!](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/elastic-login-success.png)
 
-Many hours, days, a VM restart, and many sweaty, hair-pulling moments have finally led both me and <strong>you</strong> to this moment! We have a frontend!
+![IT WORKED!](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/elastic-login-success.png)
 
-<h2 align="center">Creating Our Own User</h2>
+## Creating Our Own User
+
 Click the `Explore on my own` button to continue to the Elastic UI. Once we're in, our sole goal is to create an admin user for ourself, so that we don't need to log in to the `elastic` superuser every time.
 
 Given the steps in the [Official Elastic Docs](https://www.elastic.co/guide/en/kibana/8.17/using-kibana-with-security.html), we will go to the Roles management page and create a new user with the `kibana_admin` role; to grant us admin access to the Kibana; by extension, the SIEM frontend.
 
 Scroll down and click the `Manage Permissions` button. On the sidebar to the left, Click `Users` under `Security`. This is where we want to be.
-![User page!](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/users-page-success.png)
+
+![User page!](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/users-page-success.png)
 
 Click the `Create User` button, and set up the credentials as needed. <strong>For privileges, select the following roles:</strong>
 - beats_admin
@@ -402,15 +407,17 @@ Click the `Create User` button, and set up the credentials as needed. <strong>Fo
 - superuser, to access Fleet Management
 
 More information about privileges can be found [here in the Elastic Docs!](https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-roles.html) To ensure that our account actually works, we will attempt to login to it on the Elastic login page. Logout then log back in using our new user.
-![Nice!](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/new-user-success.png)
+
+![Nice!](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/new-user-success.png)
 
 We are now ready to move on! If we ever need to modify our account privileges, we will simply login using the `elastic` superuser again and modify our roles as needed.
 
-<h2 align="center">Understanding Fleet and Creating a Fleet Server</h2>
+## Understanding Fleet and Creating a Fleet Server
 Open the hamburger menu of the left of our UI and scroll to `Management` and click `Fleet`. 
 
 Fleet management will take some time to load, but once it is, we will configure our fleet server with the following options:
-![My fleet config.](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/fleet-config.png)
+
+![My fleet config.](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/fleet-config.png)
 
 Click the `Add host` button and then generate our service token. I recommend taking a photo or saving this token SOMEWHERE because yes, you WILL forget it. Our next step is to actually get an Elastic Agent set up with Fleet.
 
@@ -436,10 +443,10 @@ sudo ./elastic-agent install --url=https://10.0.2.15:8220 \
 ```
 
 I recommened pasting that entire command into a separate notepad and editting it; change the IP to match your Fleet server IP that we set earlier as well as the Elasticsearch IP and input your service token from before to replace `YOUR_SERVICE_TOKEN` in the above command. Paste the entire command into your terminal and hit Enter!
-![Yatta!](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/elastic-agent-success.png)
-![Yippee!](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/fleet-server-success.png)
 
-I had to restore my VM many times to snapshots because I made various typos that invalidated the server setup, but still installed the Agent. Simply put, I couldn't revert anything. <strong>Don't do that :)</strong>
+![Elastic ss!](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/elastic-agent-success.png)
+
+![Fleet ss](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/fleet-server-success.png)
 
 You will notice that we are able to upgrade our Fleet server, however I am not sure if that requires upgrades to our other services at this time. You may go ahead and attempt to upgrade the service but make snapshots and take your time!
 
@@ -451,24 +458,27 @@ If you do wish to shut down your server. You can do so with the following steps:
 3. `sudo systemctl stop elasticsearch.service`
 4. `sudo systemctl stop elastic-agent`
 
-**I have noticed that sometimes, the `stop` command will timeout and fail when attempting to stop the `elastic-agent` service. I am not sure why this occurs. If anyone does know, do let me know! To my knowledge, it has no impact on anything; nothing has broken *yet*.**
 
-<h2 align="center">Creating Agent Policies To Collect Logs</h2>
+## Creating Agent Policies To Collect Logs
+
 Navigate to the `Fleet` menu and click `Agent Policies`. Recall that agent policies will define what logs we want our agents to collect. To my knowledge, the Elastic Agent(s) **work with Filbeat** to get log data specified. Both the Filebeat configurations and agent policies work in tandem for log ingestion.
 
 Click `Create Agent Policy`. For the sake of demonstration, we will create a basic policy encompassing Windows Endpoints, since we will be using a Windows VM down the line for our mock incidents.
-![Policy configuration.](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/policy-config.png)
+
+![Policy configuration.](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/policy-config.png)
 
 Once your policy is created, click on it and select `Add Integration`. This is where we get to finally have some fun tweaking how our agents will work! What we're interested in is the `Security` section, but feel free to scroll and check out all the options at your disposal. What we **really** want is the `Endpoint Security` integration. Click on it once you've found it.
 
 Click `Add Endpoint Security` and configure the integration as you please. Click `Save and continue` once your finished.
-![Integration configuration!](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/integration-config.png)
+
+![Integration configuration!](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/integration-config.png)
 
 Once your configuration is saved, you'll get a popup to add Elastic Agents to your host machines. Click `Add Elastic Agent later`; we will handle this soon! Before we continue on, get to **this** menu and click on your `Endpoint Security` integration's name. 
-![This lovely thing.](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/agent-policy-config.png)
+
+![This lovely thing.](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/agent-policy-config.png)
 
 Scroll to the bottom and click `Show advanced settings`. Scroll until you find `windows.advanced.elasticsearch.tls.ca_crt`. This property will house the public CA certificate for elasticsearch on our endpoint(s). I have set the directory for this to be `C:\Windows\System32\ca.crt`; we'll handle getting the cert copied from our server VM to the Windows endpoint in a later step and will require us to tinker with our VM settings. For now, simply save and continue.
 
-Next, we will add the `Windows` integration. Yes, that's its name. Add it just as we did before. The integration itself will log all sorts of behaviour but particularly **Script Block Logging** through the `PowerShell Operational` event log channel, which will log any and all commands ran in PowerShell, provided we have it enabled on our endpoint(s); we'll worry about this when it matters.
+Next, we will add the `Windows` integration. Yes, that's its name. Add it just as we did before. The integration itself will log all sorts of behaviour but particularly **Script Block Logging** through the `PowerShell Operational` event log channel, which will log any and all commands ran in PowerShell, provided we have it enabled on our endpoint(s)
 
 Click `Save and continue` then click `Add Elastic Agent later` once more. With all that said and done, we are done tweaking our Agents!
