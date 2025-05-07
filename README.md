@@ -113,13 +113,17 @@ If you don't have ssh enabled by default, you can and should do the following:
 
 
 Next we need to create a port forwarding rule. I created this rule by going to the `Settings` tab in VirtualBox and going to `Network` then `Port Forwarding`. 
+
 ![Networking Page](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/network-settings.png)
 
 From here, I make the following Port Forwarding rule:
+
 ![Port forwarding in VirtualBox.](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/forwarding-rule.png)
+
 What this basically means is that whenever I send a TCP request to port 2222 on my machine, regardless of the IP used to specify the host, it will be forwarded to port 22 on the Guest IP, which is our DHCP IP address from before. <strong>You can (and should) change the Host IP value to something that isn't blank since that will allow any machine to access the VM effectively. You can specify 127.0.0.1 for the Host IP to only allow localhost/your machine to access the VM.</strong>
 
-After that we should be able to `ssh` given any IP address and on port 2222. Run `ssh -p 2222 SERVER_USERNAME@127.0.0.1` 
+After that we should be able to `ssh` given any IP address and on port 2222. Run `ssh -p 2222 SERVER_USERNAME@127.0.0.1`
+
 ![SSH success.](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/ssh-success.png)
 
 ## Continuing to setup Elasticsearch
@@ -142,7 +146,7 @@ We will want to confirm that Elasticsearch is actually on our system, so run `su
 
 With that all said and done, we are officially finished the installation phase for Elasticsearch and will now get to configuring it.
 
-<h2 align="center">Configuring Elasticsearch and Testing It Out</h2>
+Configuring Elasticsearch and Testing It Out
 This step is entirely for configuring Elasticsearch; telling it how to run, what ports it needs, communication, etc.
 
 Open `/etc/elasticsearch/elasticsearch.yml` in a text editor (neovim da goat). If you are using a terminal editor like me, run `sudo EDITOR_OF_CHOICE ELASTICSEARCH.YML PATH`. Firstly, we will edit the cluster.name property to be the name of your choice for your homelab. 
@@ -385,6 +389,7 @@ Open your Network settings as we did long ago to configure SSH's port forwaring.
 
 
 The loading may take a while; just be patient...
+
 ![A FRONTEND????????????](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/frontend-loaded.png)
 
 Now we login using our <strong>`elastic` superuser credentials</strong> and NOT the `kibana_system` user.
