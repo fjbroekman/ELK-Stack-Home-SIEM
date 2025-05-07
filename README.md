@@ -75,7 +75,7 @@ To set up the OS on our VM:
    
 <br>
 
-![](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/waiting-for-install.png)
+![Installation](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/waiting-for-install.png))
 
 <br>
 
@@ -85,7 +85,7 @@ Once you reboot your system, wait for your log statements to stop, then press En
 
 <br>
 
-![Voila](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/login-complete.png)
+![Login](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/login-complete.png)
 
 <br>
 
@@ -112,23 +112,24 @@ If you don't have ssh enabled by default, you can and should do the following:
 ## More SSH Setup
 
 
-Next we need to create a port forwarding rule. I created this rule by going to the `Settings` tab in VirtualBox and going to `Network` then `Port Forwarding`. ![Networking Page](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/network-settings.png)
+Next we need to create a port forwarding rule. I created this rule by going to the `Settings` tab in VirtualBox and going to `Network` then `Port Forwarding`. 
+![Networking Page](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/network-settings.png)
 
 From here, I make the following Port Forwarding rule:
 ![Port forwarding in VirtualBox.](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/forwarding-rule.png)
 What this basically means is that whenever I send a TCP request to port 2222 on my machine, regardless of the IP used to specify the host, it will be forwarded to port 22 on the Guest IP, which is our DHCP IP address from before. <strong>You can (and should) change the Host IP value to something that isn't blank since that will allow any machine to access the VM effectively. You can specify 127.0.0.1 for the Host IP to only allow localhost/your machine to access the VM.</strong>
 
-Moment of truth, we should be able to `ssh` given any IP address and on port 2222. Run `ssh -p 2222 SERVER_USERNAME@127.0.0.1` and hope for the best!
+After that we should be able to `ssh` given any IP address and on port 2222. Run `ssh -p 2222 SERVER_USERNAME@127.0.0.1` 
 ![SSH success.](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/ssh-success.png)
 
-<h2 align="center">Continuing to setup Elasticsearch</h2>
-<strong>The horrors persist but so do we, let's continue!</strong> If your VM is not running right now, go and start it up. We'll SSH in just like before and get straight to business.
+## Continuing to setup Elasticsearch
 
 Firstly, we will be installing `apt-transport-https`, which on its own enables APT transport to be done w/ HTTPS and not HTTP; slightly more secure stuff for our VM which could prove useful for production environments.
 
 Run `sudo apt install apt-transport-https -y` and continue. Next we add the GPG key for Elasticsearch and its repo to our Ubuntu sources.
 
 Run `wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -` to add the GPG key and `echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-7.x.list` to see the repo in our ubuntu sources. 
+
 ![GPG and repo added!](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/gpg-repo-success.png)
 
 Success! Update our packages then install elasticsearch. Run `sudo apt update -y && sudo apt install elasticsearch -y`.
