@@ -73,7 +73,7 @@ To set up the OS on our VM:
    
 <br>
 
-![Inputting user credentials, you can change yours to your liking!](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/profile-setup.png)
+
 
 <br>
 
