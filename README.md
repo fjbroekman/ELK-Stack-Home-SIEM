@@ -1,11 +1,11 @@
-<h1 align="center">🛡️ ELK Stack Home SIEM Lab</h1>
+# 🛡️ ELK Stack Home SIEM Lab
 
 Welcome to my personal Security Information and Event Management (SIEM) lab built using the ELK Stack (Elasticsearch, Logstash, Kibana) along with Filebeat for log shipping. This project simulates a centralized logging environment for monitoring and analyzing system logs, making it a great practice setup for cybersecurity learning and blue team operations.
 
 
 ---
 
-<h2 align="center">📸 Project Overview</h2>
+## 📸 Project Overview
 
 This lab is designed for:
 
@@ -16,7 +16,7 @@ This lab is designed for:
 
 ---
 
-<h2 align="center">🧰 Stack Components</h2>
+## 🧰 Stack Components
 
 | Component     | Description                               |
 |---------------|-------------------------------------------|
@@ -26,7 +26,7 @@ This lab is designed for:
 
 ---
 
-<h2 align="center">🏗️ Architecture</h2>
+## 🏗️ Architecture
 
 
 1. Elasticsearch, Kibana and Filebeat is installed on a Linux host
@@ -36,10 +36,11 @@ This lab is designed for:
    
 ---
 
-<h2 align="center">The Setup Begins</h2>
+## The Setup Begins
 This is our first step into our SIEM-building journey. First things first, we need a VM to host our services. We'll be using VirtualBox for just that.
 
 Once VirtualBox is set up, we can install an ISO for our VM; preferably Linux. I am running an **Ubuntu Server VM**
+
 
 To set up the VM:
 1. Open VirtualBox and Select `Machine` then `New`.
@@ -50,20 +51,42 @@ To set up the VM:
 
 To set up the OS on our VM:
 1. Select your language accordingly.
-<div align="center">
-  <img src="(https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/select-language.png)" alt="azure vm" width="500"/>
-</div>
-![Select a Language](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/select-language.png)
-3. If you get an "installer update" notice, you can skip it as you wish.
-4. <strong>Record the IP shown next to DHCPv4, we will need this!</strong>
-5. We don't need a proxy, so we can skip configuring one. We also don't need an alternative mirror for Ubuntu, so leave everything there as is.
-6. Continue setting up the storage config for the OS, there is no need to tinker with anything unless <strong>you</strong> want to :) ![Storage Conig](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/storage-config.png)
-7. Confirm your user credentials and SSH setup, tick the OpenSSH Server Box. We don't need any featured software on our VM, so continue with the installation. ![Inputting user credentials, you can change yours to your liking!](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/profile-setup.png)
-8. Wait for the OS install to complete :) ![](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/waiting-for-install.png)
+   
+<br>
 
-Congrats! You're one step closer to a lovely homelab setup. Let's continue to our next step of our journey; installing and Configuring Elasticsearch.
+ ![Select a Language](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/select-language.png)
+ 
+ <br>
+ 
+2. If you get an "installer update" notice, you can skip it as you wish.
+3. <strong>Record the IP shown next to DHCPv4, we will need this!</strong>
+4. We don't need a proxy, so we can skip configuring one. We also don't need an alternative mirror for Ubuntu, so leave everything there as is.
+5. Continue setting up the storage config for the OS, there is no need to tinker with anything unless you want to
+   
+<br>
 
-<h2 align="center">Installing and Configuring Elasticsearch</h2>
+![Storage Conig](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/storage-config.png)
+
+<br>
+
+6. Confirm your user credentials and SSH setup, tick the OpenSSH Server Box. We don't need any featured software on our VM, so continue with the installation.
+   
+<br>
+
+![Inputting user credentials, you can change yours to your liking!](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/profile-setup.png)
+
+<br>
+
+7. Wait for the OS install to complete
+   
+<br>
+
+![](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/waiting-for-install.png)
+
+<br>
+
+## Installing and Configuring Elasticsearch
+
 Before we even get to starting anything, go into your VirtualBox menu and select the 3 bars next to your VM, then select `Snapshots`. Click `Take` and name the snapshot however you like. Congratulations, you have just implemented a failsafe in case you break your VM somehow. <strong>I strongly recommend you regularly take snapshots of your VM when you reach checkpoints in this guide.</strong>
 
 Once you reboot your system, wait for your log statements to stop, then press Enter. Continue to logging in as your user. When you're in, your screen should look something like this:
@@ -76,12 +99,12 @@ sudo apt dist-upgrade -y
 sudo apt install zip unzip -y
 sudo apt install jq -y
 ```
-If you're done for the day like me, you can shutdown your VM by going to `Machine` --> `ACPI Shutdown` and return later :) otherwise, run `sudo reboot` to continue.
 
 From here on out, we will be using SSH on our host machine instead of using VirtualBox.
 
-<h2 align="center">"SSH no worko!"</h2>
-If you're like me and SOMEHOW don't have ssh enabled by default, you can and should do the following:
+## SSH Setup 
+If you don't have ssh enabled by default, you can and should do the following:
+<br>
 1. Run `sudo systemctl status ssh` to see if SSH is even live on your system. 
 2. If you see an error entailing `ssh.service` couldn't be found. Don't panic. We will simply reinstall OpenSSH so we can continue.
 3. Run the following command: `sudo apt-get remove --purge openssh-server&& sudo apt-get update && sudo apt-get install openssh-server`.
