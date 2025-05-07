@@ -65,17 +65,11 @@ To set up the OS on our VM:
    
 <br>
 
-![Storage Conig](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/storage-config.png)
+![Storage Conig](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/storage-config.png)
 
 <br>
 
 6. Confirm your user credentials and SSH setup, tick the OpenSSH Server Box. We don't need any featured software on our VM, so continue with the installation.
-   
-<br>
-
-![Enter your credentials](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/profile-setup.png)
-
-<br>
 
 7. Wait for the OS install to complete
    
@@ -87,10 +81,13 @@ To set up the OS on our VM:
 
 ## Installing and Configuring Elasticsearch
 
-Before we even get to starting anything, go into your VirtualBox menu and select the 3 bars next to your VM, then select `Snapshots`. Click `Take` and name the snapshot however you like. Congratulations, you have just implemented a failsafe in case you break your VM somehow. <strong>I strongly recommend you regularly take snapshots of your VM when you reach checkpoints in this guide.</strong>
-
 Once you reboot your system, wait for your log statements to stop, then press Enter. Continue to logging in as your user. When you're in, your screen should look something like this:
-![Voila](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/login-complete.png)
+
+<br>
+
+![Voila](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/login-complete.png)
+
+<br>
 
 The last thing we need to do before getting to real SIEM setup fun is to update our system with the following commands:
 ```
@@ -101,6 +98,7 @@ sudo apt install jq -y
 ```
 
 From here on out, we will be using SSH on our host machine instead of using VirtualBox.
+<br>
 
 ## SSH Setup 
 If you don't have ssh enabled by default, you can and should do the following:
@@ -110,19 +108,18 @@ If you don't have ssh enabled by default, you can and should do the following:
 3. Run the following command: `sudo apt-get remove --purge openssh-server&& sudo apt-get update && sudo apt-get install openssh-server`.
 4. If all is well, you can run `sudo systemctl status ssh` and see that SSH is currently a dead process. Run `sudo systemctl start ssh` to start it up! You can also run `sudo systemctl enable ssh` to just have it be a startup process.
 
-Because I am such a nice guy, I have left a script on this repo that can do all of this for you :) 
 
-<h2 align="center">Intermission: More SSH Setup</h2>
-Fun fact, we can't just SSH and magically run on our VM. No, that'd be too easy. We actually have to do <strong>port forwarding</strong> to achieve this. Simply put, we make an SSH request on a certain port, which then gets sent to our VM at port 22; the port for SSH connections.
+## More SSH Setup
 
-To achieve this, I created this rule by going to the `Settings` tab in VirtualBox and going to `Network` then `Port Forwarding`. ![Networking Page](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/network-settings.png).
+
+Next we need to create a port forwarding rule. I created this rule by going to the `Settings` tab in VirtualBox and going to `Network` then `Port Forwarding`. ![Networking Page](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/network-settings.png)
 
 From here, I make the following Port Forwarding rule:
 ![Port forwarding in VirtualBox.](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/forwarding-rule.png)
 What this basically means is that whenever I send a TCP request to port 2222 on my machine, regardless of the IP used to specify the host, it will be forwarded to port 22 on the Guest IP, which is our DHCP IP address from before. <strong>You can (and should) change the Host IP value to something that isn't blank since that will allow any machine to access the VM effectively. You can specify 127.0.0.1 for the Host IP to only allow localhost/your machine to access the VM.</strong>
 
 Moment of truth, we should be able to `ssh` given any IP address and on port 2222. Run `ssh -p 2222 SERVER_USERNAME@127.0.0.1` and hope for the best!
-![This took me like 20-30 minutes.](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/ssh-success.png)
+![SSH success.](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/ssh-success.png)
 
 <h2 align="center">Continuing to setup Elasticsearch</h2>
 <strong>The horrors persist but so do we, let's continue!</strong> If your VM is not running right now, go and start it up. We'll SSH in just like before and get straight to business.
