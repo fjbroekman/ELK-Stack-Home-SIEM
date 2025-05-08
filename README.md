@@ -169,7 +169,9 @@ Configuring Kibana starts with installing it; run `sudo apt install kibana -y`.
 Next we will update the YML configuration of Kibana just like we did with Elasticsearch. In my case of running Vim as my editor, run `sudo vim /etc/kibana/kibana.yml`.
 
 We will leave the `server.port` property alone as port 5601 is the default option and we have no need to edit it. We will edit the `server.host` and `server.name` properties to be our IP address and an appropriate name respectively. One thing you may notice is that you can adjust the credentials for accessing the Kibana server. You can leave them blank for now, as we will change them later on.
+
 ![Our edits.](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/kibana-config.png)
+
 ![Default credentials are a big nono!](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/kibana-nono-security.png)
 
 Save and exit our changes to the YML file and go ahead and start up the Kibana service. If you're like me and have Elasticsearch not enabled in systemd, you will need to start it up in the following order:
@@ -177,6 +179,7 @@ Save and exit our changes to the YML file and go ahead and start up the Kibana s
 2. Start Kibana w/ `sudo systemctl start kibana`. We can also make Kibana run on boot w/ `sudo systemctl enable kibana`.
 
 Once both Elasticsearch and Kibana are running, we will go ahead and check the status of both services by running `sudo systemctl status elasticsearch && sudo systemctl status kibana`.
+
 ![Both services running just fine.](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/elastic-kibana-success.png)
 
 That "legacy OpenSSL" message thing is not an issue. According to ChatGPT (yes you heard that right), this is simply for backwards compatibility measures involving communication with Kibana's Node.js runtime. Basically, we do not care in the slightest. 
@@ -349,12 +352,12 @@ Save and exit as usual, and we are ready to load our new configurations to offic
 
 We don't need `filebeat` running for this next step. Our last check to ensure everything is in order is to `curl` the HTTPS host for Elasticsearch, which in my case is: `curl --get https://10.0.2.15:9200`. Replace your IP as needed, 
 
-![Fail](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/curl-fail.png)
+![Fail](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/curl-fail.png)
 
 
 The reason why `curl` failed like this is because our browser does not trust the certificate just yet, or rather, the CA. We can bypass this temporarily and just add the `--insecure` parameter to end of our `curl` command and pipe the output to `jq` to make it nice and pretty as JSON format: `curl --get https://10.0.2.15:9200 --insecure | jq`.
 
-![Success!!!](https://github.com/nubbsterr/ELK-SIEM-Setup/blob/main/screenshots/curl-success.png)
+![Success!!!](https://github.com/fjbroekman/ELK-Stack-Home-SIEM/blob/main/Images/curl-success.png)
 
 To summarize this output, we require credential to log into Elasticsearch, which we will generate in the next step of our guide. But for now we've got SSL running and security enabled! One step closer to a real homelab setup. 
 
